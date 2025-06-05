@@ -1,3 +1,4 @@
+
 window.addEventListener('DOMContentLoaded', function(){
     const canvas = document.getElementById('renderCanvas');
     if (!canvas) {
@@ -192,3 +193,4 @@ window.addEventListener('DOMContentLoaded', function(){
         }
     });
 });
+
