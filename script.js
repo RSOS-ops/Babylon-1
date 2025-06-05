@@ -35,23 +35,29 @@ const createScene = function () {
         // If meshes exist, set camera target to the first mesh's position.
         if (meshes.length > 0) {
             let mainMesh = meshes[0];
-            // Attempt to center the camera target on the bounding box of the model
+            mainMesh.scaling = new BABYLON.Vector3(2, 2, 2); // Scale by 200%
+
+            // Ensure camera target is still relevant after scaling (it should be)
             let boundingInfo = mainMesh.getHierarchyBoundingVectors();
             let center = BABYLON.Vector3.Center(boundingInfo.min, boundingInfo.max);
             camera.setTarget(center);
-
-            // Adjust camera radius based on model size if needed.
-            // This requires more complex calculation based on bounding sphere.
-            // For now, using the initial radius based on the example's camera position.
-            // The initial camera position (-0.14, 0.005, 0.03) suggests a very close view.
-            // We might need to adjust radius or field of view if the model is not visible.
-            // The example cameraPosition is very close to origin, let's assume the model is also near origin.
         }
     });
 
     // Add a hemispheric light to ensure the model is visible
-    const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-    light.intensity = 0.7;
+    // const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+    // light.intensity = 0.7;
+
+    // Add a DirectionalLight
+    // Light source is conceptually "slightly up, to the right, and slightly forward" from the model.
+    // If model is at origin, source could be (5, 5, 5).
+    // Direction of light rays is from source to target (model origin). So, (0-5, 0-5, 0-5) = (-5, -5, -5).
+    const directionalLight = new BABYLON.DirectionalLight("directionalLight", new BABYLON.Vector3(-1, -1, -1).normalize(), scene);
+    directionalLight.intensity = 0.8; // Medium intensity
+    directionalLight.diffuse = new BABYLON.Color3(1, 1, 1); // White light
+    directionalLight.specular = new BABYLON.Color3(1, 1, 1); // White highlights
+    // Set a conceptual position for the light source (e.g. for shadow maps if they were used)
+    directionalLight.position = new BABYLON.Vector3(5, 5, 5);
 
     return scene;
 };
