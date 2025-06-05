@@ -96,48 +96,83 @@ window.addEventListener('DOMContentLoaded', function(){
         const FONT_NAME = "Roboto";
         const TEXT_TO_DISPLAY = "Cory Richard";
 
-        try {
-            textMesh = BABYLON.MeshBuilder.CreateText("textMesh", TEXT_TO_DISPLAY, null, {
-                fontFamily: FONT_NAME,
-                size: 10,
-                resolution: 48,
-                depth: 1,
-                faceColors: [new BABYLON.Color4(1,1,1,1)],
-            }, scene);
+        // Text mesh creation is now inside scene.executeWhenReady
 
-            if (textMesh) {
-                const textMaterial = new BABYLON.StandardMaterial("textMaterial", scene);
-                textMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
-                textMaterial.emissiveColor = new BABYLON.Color3(0.08, 0.08, 0.08);
-                textMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-                textMesh.material = textMaterial;
+        scene.executeWhenReady(() => {
+            try {
+                console.log("Attempting to create text mesh inside executeWhenReady (simplified test)...");
+                textMesh = BABYLON.MeshBuilder.CreateText("textMesh", TEXT_TO_DISPLAY, null, {
+                    fontFamily: FONT_NAME,
+                    size: 10,
+                    resolution: 48,
+                    depth: 1,
+                    faceColors: [new BABYLON.Color4(1,1,1,1)]
+                }, scene);
 
-                scene.executeWhenReady(() => {
-                    if (textMesh && textMesh.getBoundingInfo()) {
-                         const bounds = textMesh.getBoundingInfo();
-                         const currentPivot = textMesh.getPivotPoint();
+                if (textMesh) {
+                    console.log("Text mesh created (simplified test).");
+                    const textMaterial = new BABYLON.StandardMaterial("textMaterial", scene);
+                    textMaterial.diffuseColor = new BABYLON.Color3(1, 1, 1);
+                    textMaterial.emissiveColor = new BABYLON.Color3(0.08, 0.08, 0.08);
+                    textMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+                    textMesh.material = textMaterial;
+                } else {
+                    console.error(`Failed to create text mesh (simplified test).`);
+                }
+            } catch (e) {
+                console.error(`Error during text creation (simplified test): ${e.message}`, e);
+                textMesh = null;
+            }
+
+            console.log("scene.executeWhenReady executed (simplified test).");
+
+            /* --- Start of temporarily commented out section ---
+            // Existing logic from executeWhenReady starts here
+            if (textMesh && textMesh.getBoundingInfo()) {
+                 const bounds = textMesh.getBoundingInfo();
+                 const currentPivot = textMesh.getPivotPoint();
                          const centerAdjustment = bounds.boundingBox.center.subtract(currentPivot); // Adjust relative to current pivot
                          textMesh.setPivotPoint(centerAdjustment); // Set new pivot relative to current local origin
                          textMesh.computeWorldMatrix(true); // Recompute after pivot change
                          console.log("Text pivot centered using setPivotPoint.");
-                    }
+            } 
 
-                    if (textMesh && scene.activeCamera) {
-                        positionAndScaleText(textMesh, scene, camera);
-                    } else {
-                        console.error("Text mesh or camera not available for initial scaling post pivot adjustment.");
-                    }
-                });
-
-            } else {
-                console.error(`Failed to create text mesh for "${TEXT_TO_DISPLAY}" with font "${FONT_NAME}". Check font availability and browser console.`);
+            // Fallback sphere logic
+            if (!textMesh || (textMesh.getBoundingInfo && textMesh.getBoundingInfo().boundingBox.extendSize.x === 0)) {
+                const existingFallback = scene.getMeshByName("fallbackSphere");
+                if (!existingFallback) {
+                    console.warn("Text mesh is null or has zero width after creation attempt. Creating fallback sphere.");
+                    const sphere = BABYLON.MeshBuilder.CreateSphere("fallbackSphere", {diameter: 2}, scene);
+                    sphere.position = new BABYLON.Vector3(0, 1, 0);
+                    console.log("Fallback sphere created.");
+                } else {
+                    console.log("Text mesh is null or has zero width, and fallback sphere already exists.");
+                }
+                if (textMesh && textMesh.getBoundingInfo && textMesh.getBoundingInfo().boundingBox.extendSize.x === 0) {
+                   textMesh = null;
+                }
             }
-        } catch (e) {
-            console.error(`Error during text creation: ${e.message}`, e);
-        }
 
-        return scene;
-    };
+            if (textMesh && textMesh.getBoundingInfo()) {
+                console.log("Text Mesh BoundingBox Extend Size:", textMesh.getBoundingInfo().boundingBox.extendSize);
+                console.log("Text Mesh Scaling:", textMesh.scaling);
+                console.log("Text Mesh Position:", textMesh.position);
+            }
+
+            if (textMesh && scene.activeCamera) {
+                positionAndScaleText(textMesh, scene, camera);
+            } else {
+                if (!textMesh) {
+                     console.error("Text mesh not available for initial scaling (it might have been replaced by a fallback sphere).");
+                } else {
+                     console.error("Camera not available for initial scaling post pivot adjustment.");
+                }
+            }
+            --- End of temporarily commented out section --- */
+        }); // This is the closing brace for scene.executeWhenReady
+
+        return scene; 
+    }; // This is the closing brace for createScene function.
 
     const scene = createScene();
 
