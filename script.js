@@ -28,7 +28,7 @@ const createScene = function () {
     skybox.material = skyboxMaterial;
 
     // Model Loading
-    BABYLON.SceneLoader.ImportMesh("", "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/MosquitoInAmber/glTF/", "MosquitoInAmber.gltf", scene, function (meshes) {
+    BABYLON.SceneLoader.ImportMesh("", "", "HoodedCory_GoodNewHoodShiny_.FaceDark.glb", scene, function (meshes) {
         // Optional: scale or position the loaded model if necessary
         // meshes[0].scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);
         // Ensure the camera is targeting the loaded model or a point of interest.
