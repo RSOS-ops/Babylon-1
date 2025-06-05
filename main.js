@@ -105,7 +105,7 @@ window.addEventListener('DOMContentLoaded', function(){
                     fontFamily: FONT_NAME,
                     size: 10,
                     resolution: 48,
-                    depth: 1,
+                    depth: 0.01,
                     faceColors: [new BABYLON.Color4(1,1,1,1)]
                 }, scene);
 
@@ -126,7 +126,6 @@ window.addEventListener('DOMContentLoaded', function(){
 
             console.log("scene.executeWhenReady executed (simplified test).");
 
-            /* --- Start of temporarily commented out section ---
             // Existing logic from executeWhenReady starts here
             if (textMesh && textMesh.getBoundingInfo()) {
                  const bounds = textMesh.getBoundingInfo();
@@ -168,7 +167,6 @@ window.addEventListener('DOMContentLoaded', function(){
                      console.error("Camera not available for initial scaling post pivot adjustment.");
                 }
             }
-            --- End of temporarily commented out section --- */
         }); // This is the closing brace for scene.executeWhenReady
 
         return scene; 
