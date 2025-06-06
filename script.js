@@ -13,6 +13,12 @@ const createScene = function () {
     // camera.setPosition(new BABYLON.Vector3(-0.14, 0.005, 0.03)); // This line is removed
     camera.attachControl(canvas, true);
 
+    // Limit camera controls to X-axis
+    camera.inputs.attached.mousewheel.axis = BABYLON.Axis.X;
+    camera.inputs.attached.pointers.axis = BABYLON.Axis.X;
+    camera.lowerBetaLimit = camera.beta;
+    camera.upperBetaLimit = camera.beta;
+
     // Enable auto-rotation
     camera.autoRotate = true;
     camera.autoRotateSpeed = 0.5; // Adjust speed as needed
