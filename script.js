@@ -109,15 +109,15 @@ const createScene = function () {
                 "spotLight",
                 spotLightPosition,
                 spotLightDirection,
-                5 * Math.PI / 180, // Angle in radians
+                15 * Math.PI / 180, // Angle in radians (15 degrees)
                 2, // Exponent (falloff)
                 scene
             );
-            spotLight.intensity = 75;
-            // Deep red color
-            const deepRedColor = new BABYLON.Color3(0.6, 0.1, 0.1);
-            spotLight.diffuse = deepRedColor;
-            spotLight.specular = deepRedColor;
+            spotLight.intensity = 150; // Increased intensity
+            // Bright red color
+            const brightRedColor = new BABYLON.Color3(1, 0, 0); // Bright red
+            spotLight.diffuse = brightRedColor;
+            spotLight.specular = brightRedColor;
         }
     });
 
@@ -135,6 +135,12 @@ const createScene = function () {
     // directionalLight.specular = new BABYLON.Color3(1, 1, 1); // White highlights
     // // Set a conceptual position for the light source (e.g. for shadow maps if they were used)
     // directionalLight.position = new BABYLON.Vector3(5, 5, 5);
+
+    // Add a dim HemisphericLight for overall ambient illumination
+    const ambientLight = new BABYLON.HemisphericLight("ambientLight", new BABYLON.Vector3(0, 1, 0), scene);
+    ambientLight.intensity = 0.2;
+    ambientLight.diffuse = new BABYLON.Color3(1, 1, 1); // White
+    ambientLight.specular = new BABYLON.Color3(1, 1, 1); // White
 
     return scene;
 };
