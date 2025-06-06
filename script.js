@@ -11,11 +11,11 @@ const createScene = function () {
     // Babylon's ArcRotateCamera is defined by alpha, beta, radius, and target.
     // We'll set the position directly and then set the target.
     // camera.setPosition(new BABYLON.Vector3(-0.14, 0.005, 0.03)); // This line is removed
-    camera.attachControl(canvas, true);
+    camera.detachControl(canvas);
 
     // Enable auto-rotation
-    camera.autoRotate = true;
-    camera.autoRotateSpeed = 0.5; // Adjust speed as needed
+    // camera.autoRotate = true;
+    // camera.autoRotateSpeed = 0.5; // Adjust speed as needed
 
     // Skybox
     const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
@@ -94,6 +94,51 @@ const createScene = function () {
             // console.log("Model Dimension for Framing (Height/Width/Depth):", modelDimensionForFraming);
             // console.log("Calculated Camera Distance (Radius):", distance);
             // console.log("Camera FOV (radians):", camera.fov);
+
+            // New code for model rotation starts here:
+            // Ensure mainMesh is available (it is, from the callback)
+            if (mainMesh) {
+                let isDragging = false;
+                let lastPointerX = 0;
+                let lastPointerY = 0;
+                const rotationSpeed = 0.005; // Adjust for sensitivity
+
+                scene.onPointerObservable.add((pointerInfo) => {
+                    switch (pointerInfo.type) {
+                        case BABYLON.PointerEventTypes.POINTERDOWN:
+                            isDragging = true;
+                            lastPointerX = pointerInfo.event.clientX;
+                            lastPointerY = pointerInfo.event.clientY;
+                            // Optional: change cursor style
+                            // canvas.style.cursor = "grabbing";
+                            break;
+                        case BABYLON.PointerEventTypes.POINTERUP:
+                            isDragging = false;
+                            // Optional: revert cursor style
+                            // canvas.style.cursor = "grab";
+                            break;
+                        case BABYLON.PointerEventTypes.POINTERMOVE:
+                            if (isDragging) {
+                                const deltaX = pointerInfo.event.clientX - lastPointerX;
+                                const deltaY = pointerInfo.event.clientY - lastPointerY;
+
+                                // Apply rotation. Rotating around world axes for simplicity here.
+                                // For model-local rotation, would need to use quaternions or transform nodes.
+                                // Rotating mainMesh.rotation.y and mainMesh.rotation.x directly applies local rotations.
+                                mainMesh.rotation.y += deltaX * rotationSpeed;
+                                mainMesh.rotation.x += deltaY * rotationSpeed;
+
+                                lastPointerX = pointerInfo.event.clientX;
+                                lastPointerY = pointerInfo.event.clientY;
+                            }
+                            break;
+                    }
+                });
+
+                // Optional: Set initial cursor style
+                // canvas.style.cursor = "grab";
+            }
+            // End of new code for model rotation
         }
     });
 
