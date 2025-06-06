@@ -6,11 +6,11 @@ const createScene = function () {
 
     // Camera
     // Parameters: name, alpha, beta, radius, target position, scene
-    const camera = new BABYLON.ArcRotateCamera("camera", 0, 0, 0.1, new BABYLON.Vector3(0, 0, 0), scene);
+    const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2, 5, new BABYLON.Vector3(0, 0, 0), scene);
     // Positions the camera based on the example URL: -0.14,0.005,0.03
     // Babylon's ArcRotateCamera is defined by alpha, beta, radius, and target.
     // We'll set the position directly and then set the target.
-    camera.setPosition(new BABYLON.Vector3(-0.14, 0.005, 0.03));
+    // camera.setPosition(new BABYLON.Vector3(-0.14, 0.005, 0.03)); // This line is removed
     camera.attachControl(canvas, true);
 
     // Enable auto-rotation
@@ -35,12 +35,65 @@ const createScene = function () {
         // If meshes exist, set camera target to the first mesh's position.
         if (meshes.length > 0) {
             let mainMesh = meshes[0];
-            mainMesh.scaling = new BABYLON.Vector3(2, 2, 2); // Scale by 200%
+            // Preserve existing scaling, e.g., current is (2,2,2)
+            mainMesh.scaling = new BABYLON.Vector3(2, 2, 2);
 
-            // Ensure camera target is still relevant after scaling (it should be)
+            // Calculate bounding box for the entire hierarchy
             let boundingInfo = mainMesh.getHierarchyBoundingVectors();
-            let center = BABYLON.Vector3.Center(boundingInfo.min, boundingInfo.max);
-            camera.setTarget(center);
+            // It's often better to use the center of the bounding box directly
+            let modelCenter = boundingInfo.center.clone(); // Use .clone() if you plan to modify it later, though not here.
+
+            // Calculate the size of the bounding box vector
+            let modelSizeVec = boundingInfo.max.subtract(boundingInfo.min);
+
+            // Set camera target to the center of the model's hierarchy
+            camera.setTarget(modelCenter);
+
+            // Determine the model's height (for vertical FOV)
+            // Use Math.abs to ensure positive height, as min/max could be "inverted" if model has unusual root transform
+            let modelDimensionForFraming = Math.abs(modelSizeVec.y);
+
+            // If height is negligible (e.g., a flat plane), use width or depth.
+            if (modelDimensionForFraming < 0.001) {
+                modelDimensionForFraming = Math.max(Math.abs(modelSizeVec.x), Math.abs(modelSizeVec.z));
+            }
+            // If all dimensions are tiny, use a fallback small value to prevent division by zero or extremely small distances
+            if (modelDimensionForFraming < 0.001) {
+                modelDimensionForFraming = 0.1;
+            }
+
+            // Calculate the required distance for the camera
+            // camera.fov is the vertical field of view in radians. Default is 0.8 for ArcRotateCamera.
+            // Formula: distance = (objectHeightForFraming / (2 * percentageOfView)) / tan(verticalFov / 2)
+            const percentageOfView = 0.75; // Aim for 75% of view height
+            let distance = (modelDimensionForFraming / (2 * percentageOfView)) / Math.tan(camera.fov / 2);
+
+            // Sanity check for distance: ensure it's a positive, reasonable number.
+            if (isNaN(distance) || distance <= 0 || !isFinite(distance)) {
+                console.warn("Camera distance calculation resulted in an invalid value, using default.");
+                distance = 10; // Fallback distance
+            }
+            // Add a small buffer to the distance so model is not exactly touching screen edges.
+            distance *= 1.1;
+
+
+            // Set camera properties for framing
+            camera.radius = distance;
+            // Standard front view: Alpha determines rotation around Y (up) axis. -PI/2 or 1.5*PI often means looking at Z+
+            // Beta determines rotation around X (right) axis. PI/2 means looking straight, not from top/bottom.
+            camera.alpha = -Math.PI / 2;
+            camera.beta = Math.PI / 2;
+
+            // Optional: Adjust camera clipping planes if models are very large or very small,
+            // or if camera gets very close or very far.
+            // camera.minZ = distance / 100; // Example: near clip plane relative to distance
+            // camera.maxZ = distance * 100; // Example: far clip plane relative to distance
+
+            // For debugging:
+            // console.log("Model Center:", modelCenter);
+            // console.log("Model Dimension for Framing (Height/Width/Depth):", modelDimensionForFraming);
+            // console.log("Calculated Camera Distance (Radius):", distance);
+            // console.log("Camera FOV (radians):", camera.fov);
         }
     });
 
