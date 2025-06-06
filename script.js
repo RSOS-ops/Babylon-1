@@ -102,7 +102,7 @@ const createScene = function () {
             // console.log("Camera FOV (radians):", camera.fov);
 
             // Add a SpotLight
-            const spotLightPosition = new BABYLON.Vector3(modelCenter.x, modelCenter.y + 5, modelCenter.z);
+            const spotLightPosition = new BABYLON.Vector3(0, 2, 0); // Fixed position
             const spotLightDirection = modelCenter.subtract(spotLightPosition).normalize(); // Direction from light position to model center
 
             const spotLight = new BABYLON.SpotLight(
